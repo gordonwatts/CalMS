@@ -3,3 +3,4 @@ flake8
 # hep_tables
 # dataframe_expressions
 ipywidgets
+matplotlib
