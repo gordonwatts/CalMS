@@ -1,7 +1,9 @@
 {
     "cSpell.words": [
         "NOQA",
-        "Rucio"
+        "Rucio",
+        "jupyter",
+        "jupyterlab"
     ],
     "python.linting.flake8Enabled": true,
     "python.linting.enabled": true,

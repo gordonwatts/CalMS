@@ -1,5 +1,5 @@
 jupyterlab
 flake8
-# hl_tables
+hl_tables>=1.0b1
 ipywidgets
 matplotlib
