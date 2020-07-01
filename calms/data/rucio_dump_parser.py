@@ -1,14 +1,15 @@
-# Change a dump from rucio into a csv file that contains hss info for our samples
+# Change a dump from rucio into a csv file that contains hss info for our
+# samples
 import sys
 import re
 
 
-def parse (file_name):
+def parse(file_name):
     'Parse data in file_name'
 
     with open(file_name, 'r') as f_in:
         # Print out csv header:
-        print ('mH,mS,Lifetime,MCCampaign,RucioDSName')
+        print('mH,mS,Lifetime,MCCampaign,RucioDSName')
 
         # Read in the file
         for line in f_in:
@@ -33,11 +34,11 @@ def parse (file_name):
             # Figure out what MC campaign it is from.
             campaign = ''
             if 'r9364' in container_name:
-                campaign='mc16a'
+                campaign = 'mc16a'
             elif 'r10201' in container_name:
-                campaign='mc16d'
+                campaign = 'mc16d'
             elif 'r10724' in container_name:
-                campaign='mc16e'
+                campaign = 'mc16e'
             else:
                 raise BaseException(f'Cannot figure out what camptain {container_name} is in.')
 

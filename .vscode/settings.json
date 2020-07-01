@@ -2,9 +2,19 @@
     "cSpell.words": [
         "NOQA",
         "Rucio",
+        "asyncio",
+        "itertuples",
         "jupyter",
-        "jupyterlab"
+        "jupyterlab",
+        "pyplot",
+        "servicex",
+        "sslhep",
+        "xaod",
+        "ylim"
     ],
+    "pyright.openFilesOnly": false,
+    "python.analysis.diagnosticMode": "workspace",
+    "python.pythonPath": ".venv\\Scripts\\python.exe",
     "python.linting.flake8Enabled": true,
     "python.linting.enabled": true,
     "python.testing.autoTestDiscoverOnSaveEnabled": false,

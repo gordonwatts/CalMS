@@ -1,5 +1,7 @@
 jupyterlab
 flake8
+hep_tables>=1.1b1
 hl_tables>=1.0b1
 ipywidgets
 matplotlib
+pytest
