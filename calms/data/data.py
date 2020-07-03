@@ -3,10 +3,11 @@ import os
 import sys
 from typing import Any, Dict, List, Optional
 
+import aiohttp
 from func_adl_xAOD import ServiceXDatasetSource
-from servicex import ServiceXAdaptor
 from hep_tables import xaod_table
 import pandas as pd
+from servicex import ServiceXAdaptor
 
 dataset_file = "calms/data/datasets.csv"
 
@@ -54,15 +55,13 @@ def get_ds(mH: Optional[int] = None,
         else all_ds.query('&'.join(q_phrase))  # type: ignore
 
 
-sx_adaptor = ServiceXAdaptor('http://localhost:5000')
-
-
-def as_samples(datasets: pd.DataFrame) -> List[Dict[str, Any]]:
+def as_samples(datasets: pd.DataFrame, client: Optional[aiohttp.ClientSession] = None) \
+            -> List[Dict[str, Any]]:
     '''
     Given a pandas dataframe that was pulled from `get_ds`, return a similar
     dict, with one entry containing xaod_table.
     '''
-    def convert(row_data):
+    def convert(row_data, sx_adaptor):
         from servicex import ServiceXDataset
         sd = ServiceXDataset(row_data.RucioDSName, servicex_adaptor=sx_adaptor,
                              image="sslhep/servicex_func_adl_xaod_transformer:v0.4Update")
@@ -74,4 +73,6 @@ def as_samples(datasets: pd.DataFrame) -> List[Dict[str, Any]]:
             'data': xaod_table(ServiceXDatasetSource(sd))
         }
 
-    return [convert(row_data) for row_data in datasets.itertuples()]
+    sx_adaptor = ServiceXAdaptor('http://localhost:5000')
+
+    return [convert(row_data, sx_adaptor) for row_data in datasets.itertuples()]

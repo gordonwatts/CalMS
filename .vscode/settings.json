@@ -2,6 +2,7 @@
     "cSpell.words": [
         "NOQA",
         "Rucio",
+        "aiohttp",
         "asyncio",
         "itertuples",
         "jupyter",
