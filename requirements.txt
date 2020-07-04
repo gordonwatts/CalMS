@@ -5,3 +5,4 @@ hl_tables>=1.0b1
 ipywidgets
 matplotlib
 pytest
+seaborn
