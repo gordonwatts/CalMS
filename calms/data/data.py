@@ -61,7 +61,7 @@ def as_samples(datasets: pd.DataFrame, client: Optional[aiohttp.ClientSession] =
     Given a pandas dataframe that was pulled from `get_ds`, return a similar
     dict, with one entry containing xaod_table.
     '''
-    def convert(row_data, sx_adaptor):
+    def convert(row_data, sx_adaptor=None):
         from servicex import ServiceXDataset
         sd = ServiceXDataset(row_data.RucioDSName, servicex_adaptor=sx_adaptor,
                              image="sslhep/servicex_func_adl_xaod_transformer:v0.4Update")
@@ -73,6 +73,4 @@ def as_samples(datasets: pd.DataFrame, client: Optional[aiohttp.ClientSession] =
             'data': xaod_table(ServiceXDatasetSource(sd))
         }
 
-    sx_adaptor = ServiceXAdaptor('http://localhost:5000')
-
-    return [convert(row_data, sx_adaptor) for row_data in datasets.itertuples()]
+    return [convert(row_data) for row_data in datasets.itertuples()]
