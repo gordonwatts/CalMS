@@ -64,7 +64,7 @@ def as_samples(datasets: pd.DataFrame, client: Optional[aiohttp.ClientSession] =
     def convert(row_data, sx_adaptor=None):
         from servicex import ServiceXDataset
         sd = ServiceXDataset(row_data.RucioDSName, servicex_adaptor=sx_adaptor,
-                             image="sslhep/servicex_func_adl_xaod_transformer:v0.4Update")
+                             image="sslhep/servicex_func_adl_xaod_transformer:v0.4update")
         return {
             'mS': float(row_data.mS),
             'mH': float(row_data.mH),
