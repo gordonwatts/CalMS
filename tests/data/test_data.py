@@ -5,7 +5,7 @@ from hep_tables import xaod_table
 
 def test_ds_no_args():
     ds = get_ds()
-    assert len(ds) == 57
+    assert len(ds) > 10
 
 
 def test_ds_get_one():
@@ -39,7 +39,7 @@ def test_as_single_sample():
     ds = get_ds(tag='highmass')
 
     sample = as_single_sample(ds)
-    assert sample['mS'] == '475'
+    assert sample['mS'] == '275'
     assert sample['mH'] == '1000'
     assert sample['lifetime'] == '5'
     assert sample['campaign'] == 'mc16a,mc16d,mc16e'
@@ -53,3 +53,9 @@ def test_as_jz_workers():
     sample = as_single_sample(ds)
     assert isinstance(sample['data'], xaod_table)
     assert sample['data'].event_source[0]._ds._max_workers == 200
+
+
+def test_default_get_returns_no_non_signal():
+    ds = as_samples(get_ds())
+    for d in ds:
+        assert 'signal' in d['tags']
