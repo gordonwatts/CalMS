@@ -10,6 +10,7 @@
         "pyplot",
         "servicex",
         "sslhep",
+        "sxds",
         "xaod",
         "ylim"
     ],
