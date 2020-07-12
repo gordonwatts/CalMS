@@ -7,9 +7,9 @@ import aiohttp
 from func_adl_xAOD import ServiceXDatasetSource
 from hep_tables import xaod_table
 import pandas as pd
-from servicex import ServiceXAdaptor
 
 dataset_file = "calms/data/datasets.csv"
+servicex_image = "sslhep/servicex_func_adl_xaod_transformer:v0.4update"
 
 
 def get_all_datasets() -> pd.DataFrame:
@@ -22,6 +22,7 @@ def get_all_datasets() -> pd.DataFrame:
         Lifetime
         MCCampaign
         RucioDSN
+        Tags
         Comments
     '''
 
@@ -36,7 +37,8 @@ def get_all_datasets() -> pd.DataFrame:
 def get_ds(mH: Optional[int] = None,
            mS: Optional[int] = None,
            lifetime: Optional[int] = None,
-           campaign: Optional[str] = None) -> pd.DataFrame:
+           campaign: Optional[str] = None,
+           tag: Optional[str] = "signal") -> pd.DataFrame:
     '''
     Return datasets that satisfy the constraints
     '''
@@ -49,28 +51,79 @@ def get_ds(mH: Optional[int] = None,
         q_phrase.append(f'Lifetime=={lifetime}')
     if campaign is not None:
         q_phrase.append(f'MCCampaign=="{campaign}"')
+    if tag is not None:
+        q_phrase.append(f'Tags.str.contains("{tag}")')
 
     all_ds = get_all_datasets()
     return all_ds if len(q_phrase) == 0 \
         else all_ds.query('&'.join(q_phrase))  # type: ignore
 
 
-def as_samples(datasets: pd.DataFrame, client: Optional[aiohttp.ClientSession] = None) \
+sx_args = {
+    'jetjet': {'max_workers': 200}
+}
+
+
+def _make_sxds(ds_name: str, tags: str):
+    '''
+    Internal method to create the sx dataset.
+    Uses tags to find extra arguments to pass to the config of the dataset.
+    '''
+    # Are there extra arguments?
+    tags = tags.split(',')
+    args = {}
+    for t in tags:
+        if t in sx_args:
+            args.update(sx_args[t])
+
+    from servicex import ServiceXDataset
+    return ServiceXDatasetSource(ServiceXDataset(ds_name, image=servicex_image, **args))
+
+
+def as_samples(datasets: pd.DataFrame) \
             -> List[Dict[str, Any]]:
     '''
     Given a pandas dataframe that was pulled from `get_ds`, return a similar
     dict, with one entry containing xaod_table.
     '''
-    def convert(row_data, sx_adaptor=None):
-        from servicex import ServiceXDataset
-        sd = ServiceXDataset(row_data.RucioDSName, servicex_adaptor=sx_adaptor,
-                             image="sslhep/servicex_func_adl_xaod_transformer:v0.4update")
+    def convert(row_data):
         return {
             'mS': float(row_data.mS),
             'mH': float(row_data.mH),
             'lifetime': float(row_data.Lifetime),
             'campaign': row_data.MCCampaign,
-            'data': xaod_table(ServiceXDatasetSource(sd))
+            'tags': row_data.Tags,
+            'data': xaod_table(_make_sxds(row_data.RucioDSName, row_data.Tags))
         }
 
     return [convert(row_data) for row_data in datasets.itertuples()]
+
+
+def _nice_format(o: Any) -> str:
+    if isinstance(o, float):
+        f = str(o)
+        if f.endswith('.0'):
+            return f[:-2]
+        return f
+    return str(o)
+
+
+def _combine_values(datasets: pd.DataFrame, column_name: str):
+    a = set([getattr(row_data, column_name) for row_data in datasets.itertuples()])
+    return ','.join(sorted([_nice_format(item) for item in a]))
+
+
+def as_single_sample(datasets: pd.DataFrame) -> List[Dict[str, Any]]:
+    '''
+    Given a list of datasets, return them as a single `xaod_table` object.
+    All samples have the same weight.
+    '''
+
+    return {
+        'mS': _combine_values(datasets, 'mS'),
+        'mH': _combine_values(datasets, 'mH'),
+        'lifetime': _combine_values(datasets, 'Lifetime'),
+        'campaign': _combine_values(datasets, 'MCCampaign'),
+        'tags': _combine_values(datasets, 'Tags'),
+        'data': xaod_table(*[_make_sxds(d.RucioDSName, d.Tags) for d in datasets.itertuples()])
+    }
