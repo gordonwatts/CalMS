@@ -1,0 +1,5 @@
+api_endpoint:
+  endpoint: http://localhost:5000
+
+  minio_endpoint: localhost:9000
+  
